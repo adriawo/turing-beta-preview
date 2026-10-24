@@ -55,7 +55,23 @@ button:hover{border-color:#91a6ff;background:#222f51}
 @media(max-width:850px){.layout{grid-template-columns:1fr}.panel{padding:15px}.graph{min-width:740px}main{padding-top:25px}.inspector{min-height:220px}}
 @media(max-width:450px){.chip{padding:8px}.toolbar{gap:5px}.brand{letter-spacing:.12em}header small{font-size:10px;padding:6px}h1{font-size:30px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important}}
-</style></head><body><header><div class="brand"><span class="brand-mark">✳</span><span>TURING</span></div><small>Beta 0.1 · dados fictícios · somente leitura</small></header><main id="app"><p>Carregando Metaverse...</p></main>
+
+/* Ponte privada: GitHub faz a autenticação; conteúdo local nunca é enviado. */
+header .repo-shortcut{margin-left:10px;white-space:nowrap;background:#25345a;color:#e4ecff;border-color:#526795;font-size:12px;padding:9px 13px}
+.bridge{max-width:1050px}
+.bridge-panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:22px}
+.bridge-panel{border:1px solid #334563;border-radius:17px;background:#152039;padding:20px;min-width:0}
+.bridge-panel h2{font-size:19px;margin:0 0 9px}.bridge-panel p{font-size:13px;margin:8px 0}
+.bridge-panel label{display:block;color:#cbd8f5;font-size:13px;font-weight:600;margin:12px 0 8px}
+.bridge-panel input[type="text"],.bridge-panel input[type="file"]{width:100%;background:#0c1426;color:#eff5ff;border:1px solid #516185;border-radius:9px;padding:12px;font-size:15px;min-width:0}
+.bridge-panel a{display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;color:#eef3ff;border:1px solid #6379af;padding:11px 14px;border-radius:10px;background:#27385e;font-size:14px;margin-top:8px}
+.bridge-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.bridge-note{padding:13px 15px;border-radius:11px;border:1px solid #526282;color:#b8c8e8;font-size:12px;line-height:1.5;margin:18px 0}
+.bridge-preview{white-space:pre-wrap;overflow-wrap:anywhere;max-height:420px;overflow-y:auto;border:1px solid #334563;background:#0d1526;padding:16px;border-radius:12px;font-size:13px;line-height:1.5}
+.bridge-file-report{margin-top:12px}
+@media(max-width:620px){header{flex-wrap:wrap}header .repo-shortcut{margin-left:0}.bridge-panel{padding:16px}}
+
+</style></head><body><header><div class="brand"><span class="brand-mark">✳</span><span>TURING</span></div><small>Beta 0.1 · dados fictícios · somente leitura</small><button class="repo-shortcut" id="private-launcher">Repertório privado ↗</button></header><main id="app"><p>Carregando Metaverse...</p></main>
 <script>
 'use strict';
 const app=document.querySelector('#app');
@@ -82,7 +98,7 @@ function turing(t){
   +'<div class="graph-scroll" id="graph-scroll" tabindex="0" aria-label="Constelação, deslize horizontalmente em telas pequenas"><svg class="graph" id="graph" viewBox="0 0 960 520" role="group" aria-label="Grafo de pistas, hipóteses, testes e resultados"></svg></div>'
   +'<p class="muted">Selecione um ponto para ver seu conteúdo. No celular, deslize o mapa para os lados.</p></section>'
   +'<aside class="panel inspector" aria-live="polite"><div class="tag">DETALHES DO NÓ</div><div class="detail-sub" id="node-type">Nenhum selecionado</div><h2 id="node-title">Explore a constelação</h2><p id="node-detail">Toque ou clique em um nó para entender a hipótese, teste ou evidência.</p><hr><div class="tag">HISTÓRICO</div><ol class="timeline">'+(t.history||[]).map(h=>'<li>'+safe(h.date)+' · '+safe(h.text)+'</li>').join('')+'</ol></aside></div>';
- document.querySelector('#back').onclick=()=>universe(state.universe);
+ document.querySelector('#back').onclick=()=>state.localImported?openPrivateBridge():universe(state.universe);
  draw(t);
  app.querySelectorAll('[data-filter]').forEach(button=>{
    button.onclick=()=>{
@@ -166,5 +182,81 @@ function draw(t){
    g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select();}});
  });
 }
+
+/* Private bridge without credentials, network calls or persistence. */
+function openPrivateBridge(){
+ state.localImported=false;
+ app.innerHTML='<div class="bridge"><button class="back" id="bridge-back">← Metaverse</button>'
+   +title('Repertório privado','Acesse seus casos reais com o login do GitHub ou visualize um arquivo local. O site não recebe acesso automático ao acervo.')
+   +'<div class="bridge-note"><strong>Privacidade:</strong> o repositório permanece privado. Só o GitHub autentica a consulta online; arquivos selecionados abaixo são lidos nesta aba, sem upload, armazenamento ou sincronização.</div>'
+   +'<div class="bridge-panels"><section class="bridge-panel"><div class="tag">GITHUB AUTENTICADO</div><h2>Consultar repertório</h2>'
+   +'<p>Use sua sessão do GitHub para abrir as investigações originais.</p>'
+   +'<a href="https://github.com/adriawo/turing/tree/main/acervo/casos" target="_blank" rel="noopener noreferrer">Abrir casos privados ↗</a>'
+   +'<label for="private-case-id">Abrir um caso pelo código</label><input id="private-case-id" type="text" placeholder="TURING-0009" maxlength="24" autocomplete="off">'
+   +'<div class="bridge-actions"><button id="private-open-case">Abrir no GitHub ↗</button><button id="private-copy-prompt">Copiar pedido para investigar</button></div><p id="private-case-status" class="muted" role="status"></p></section>'
+   +'<section class="bridge-panel"><div class="tag">VISUALIZAÇÃO LOCAL</div><h2>Abrir arquivo na interface</h2>'
+   +'<p>Selecione um <code>enunciado.md</code>, <code>caso.yaml</code> ou <code>turing.json</code> já baixado do repositório privado.</p>'
+   +'<label for="private-local-file">Arquivo local</label><input id="private-local-file" type="file" accept=".json,.md,.yaml">'
+   +'<p class="muted">Exibido somente neste navegador. Evite importar arquivos de solução ou pós-gabarito.</p></section></div>'
+   +'<section id="private-local-result" class="bridge-file-report" role="region" aria-live="polite"></section></div>';
+ document.querySelector('#bridge-back').onclick=home;
+ const caseField=document.querySelector('#private-case-id');
+ const status=document.querySelector('#private-case-status');
+ const readCase=()=>{const id=caseField.value.trim().toUpperCase();return /^TURING-[0-9]{4,}$/.test(id)?id:null};
+ document.querySelector('#private-open-case').onclick=()=>{
+   const id=readCase();
+   if(!id){status.textContent='Digite um código no formato TURING-0009.';return;}
+   const a=document.createElement('a');
+   a.href='https://github.com/adriawo/turing/tree/main/acervo/casos/'+encodeURIComponent(id);
+   a.target='_blank';a.rel='noopener noreferrer';a.click();status.textContent='Pasta solicitada ao GitHub. O acesso depende da sua sessão autenticada.';
+ };
+ document.querySelector('#private-copy-prompt').onclick=async()=>{
+   const id=readCase();if(!id){status.textContent='Digite um código válido primeiro.';return;}
+   const request='Turing: iniciar ou continuar investigação cega de '+id+' usando o repertório privado conectado no GitHub. Consultar enunciado, pistas e tentativas cegas, sem abrir gabaritos ou informações pós-gabarito. Registrar hipóteses e testes mantendo o acervo privado.';
+   try{await navigator.clipboard.writeText(request);status.textContent='Pedido copiado. Cole nesta conversa com o ChatGPT.';}
+   catch(e){status.textContent='Não foi possível copiar. Use o código '+id+' nesta conversa.';}
+ };
+ caseField.onkeydown=e=>{if(e.key==='Enter')document.querySelector('#private-open-case').click()};
+ const input=document.querySelector('#private-local-file'),output=document.querySelector('#private-local-result');
+ input.onchange=async()=>{
+   const f=input.files&&input.files[0];if(!f)return;
+   input.value='';
+   output.innerHTML='';
+   if(!['caso.yaml','enunciado.md','turing.json'].includes(f.name)){output.textContent='Arquivo não permitido para esta visualização inicial.';return;}
+   if(f.size>350000){output.textContent='Arquivo muito grande para a visualização local simplificada.';return;}
+   try{
+     const raw=await f.text();
+     if(f.name==='turing.json'){
+       const caseData=JSON.parse(raw);
+       if(!caseData||!/^(TURING-(?:DEMO-)?[0-9]{4,})$/.test(caseData.id)
+         ||!Array.isArray(caseData.nodes)||!Array.isArray(caseData.edges)
+         ||caseData.nodes.length>70||caseData.edges.length>160
+         ||caseData.nodes.some(n=>typeof n.id!=='string'||typeof n.label!=='string'||typeof n.type!=='string'||n.label.length>120)
+         ||caseData.edges.some(e=>typeof e.from!=='string'||typeof e.to!=='string')
+         ||new Set(caseData.nodes.map(n=>n.id)).size!==caseData.nodes.length
+         ||caseData.edges.some(e=>!caseData.nodes.some(n=>n.id===e.from)||!caseData.nodes.some(n=>n.id===e.to)))throw Error('Constelação inválida');
+       output.innerHTML='<div class="bridge-panel"><h2>Constelação local: '+safe(caseData.id)+'</h2>'
+        +'<p>'+caseData.nodes.length+' nós · '+caseData.edges.length+' conexões. Arquivo não enviado.</p>'
+        +'<button id="private-visualize-local">Abrir constelação</button></div>';
+       document.querySelector('#private-visualize-local').onclick=()=>{
+         state.universe={name:'Arquivo local'};
+         state.localImported=true;
+         turing({...caseData,summary:caseData.summary||'Investigação local',title:caseData.title||caseData.id,history:Array.isArray(caseData.history)?caseData.history:[]});
+       };
+     }else if(f.name==='caso.yaml'){
+       const wanted=new Set(['id','titulo','evento','edicao','numero_original']);
+       const lines=raw.split(/\r?\n/).filter(line=>{
+         const m=line.match(/^([a-z_]+):/);return m&&wanted.has(m[1]);
+       });
+       output.innerHTML='<div class="bridge-panel"><div class="tag">METADADOS FILTRADOS</div><h2>caso.yaml</h2><pre class="bridge-preview" id="private-preview"></pre></div>';
+       document.querySelector('#private-preview').textContent=lines.length?lines.join('\n'):'Metadados não encontrados.';
+     }else{
+       output.innerHTML='<div class="bridge-panel"><div class="tag">ENUNCIADO LOCAL</div><h2>enunciado.md</h2><pre class="bridge-preview" id="private-preview"></pre></div>';
+       document.querySelector('#private-preview').textContent=raw;
+     }
+   }catch(e){output.textContent='Não foi possível interpretar o arquivo selecionado.';}
+ };
+}
+document.querySelector('#private-launcher').onclick=openPrivateBridge;
 home();
 </script></body></html>
