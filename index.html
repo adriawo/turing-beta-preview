@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Turing Beta 0.1</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#080c18;color:#f3f5ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -25%,#263962 0,transparent 53%),#080c18;min-height:100vh}
+button{font:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid #a7c5ff;outline-offset:3px}
+header{padding:18px clamp(20px,4vw,55px);border-bottom:1px solid #ffffff16;display:flex;align-items:center;gap:12px;background:#080d1ccc;backdrop-filter:blur(16px)}
+.brand{display:flex;align-items:center;gap:11px;font-weight:800;letter-spacing:.18em;font-size:15px}
+.brand-mark{width:27px;height:27px;border-radius:50%;border:1px solid #9d9aff;box-shadow:0 0 15px #7673ef55;display:grid;place-items:center;color:#c6c1ff;letter-spacing:0}
+header small{margin-left:auto;border:1px solid #68799a55;background:#202b4655;border-radius:50px;padding:7px 11px;color:#b4bfd7;font-size:11px;letter-spacing:.02em}
+main{max-width:1420px;margin:0 auto;padding:34px clamp(18px,4vw,54px) 70px}
+h1{font-size:clamp(30px,4.4vw,46px);letter-spacing:-.044em;line-height:1.12;font-weight:730;margin:0 0 12px}
+h2{font-size:22px;line-height:1.3;margin:12px 0}
+p{line-height:1.6;color:#a8b5d0}
+button{background:#18223b;color:#ebf0ff;border:1px solid #354567;border-radius:11px;padding:11px 16px}
+button:hover{border-color:#91a6ff;background:#222f51}
+.back{margin-bottom:25px;background:transparent;padding:8px 13px;border:1px solid #384665}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;margin-top:30px}
+.card{display:flex;flex-direction:column;gap:12px;min-height:168px;text-align:left;padding:26px;background:linear-gradient(145deg,#1c2742,#121a2e);border:1px solid #354463;border-radius:18px}
+.card:before{content:"✦";font-size:21px;color:#92a5ff}.card strong{font-size:17px}.card p{font-size:14px;margin:0}.card small{color:#77d5c2}
+.layout{display:grid;grid-template-columns:minmax(0,1.85fr) minmax(280px,.85fr);gap:16px;margin-top:24px;align-items:stretch}
+.panel{background:#101829;border:1px solid #2b3b57;border-radius:20px;padding:20px;min-width:0;box-shadow:0 18px 48px #02051045}
+.board{background:radial-gradient(circle at 54% 43%,#182946 0,#0c1426 51%,#090f1d 100%);position:relative;overflow:hidden}
+.board:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.25;background-image:radial-gradient(#7592c0 0.7px,transparent 1px);background-size:25px 25px}
+.board-head{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;position:relative}
+.tag{font-size:11px;color:#a5b2d0;letter-spacing:.13em;text-transform:uppercase}
+.toolbar{display:flex;flex-wrap:wrap;gap:6px;margin:15px 0 9px;position:relative;align-items:center}
+.chip{padding:8px 10px;border-radius:9px;font-size:12px;background:#17223a;border:1px solid #364765;color:#b4c3de}
+.chip[aria-pressed="true"]{border-color:#90a9ff;background:#344a73;color:#fff}
+.chip-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:1px}
+.graph-scroll{position:relative;overflow-x:auto;overflow-y:hidden;scrollbar-color:#506381 #141d31;border:1px solid #2c3b58;border-radius:13px;background:#090f1b66}
+.graph{display:block;width:100%;min-width:760px;height:auto;aspect-ratio:960/520}
+.edge{stroke:#6c85b5;stroke-width:1.9;opacity:.64;fill:none;transition:opacity .15s}
+.edge.focus{stroke:#b0c3ff;stroke-width:2.9;opacity:1}
+.edge-label{font-size:11px;fill:#98abd0;paint-order:stroke;stroke:#101a2d;stroke-width:4px}
+.node{cursor:pointer;outline:none;transition:opacity .15s}
+.node-ring{fill:#162843;stroke-width:2.2;transition:stroke-width .15s}
+.node-core{opacity:.85}
+.node:focus-visible .node-ring,.node:hover .node-ring,.node[aria-pressed="true"] .node-ring{stroke-width:4.5}
+.node[aria-pressed="true"] .node-core{opacity:1}
+.node-label{fill:#e7edff;font-size:14px;font-weight:600;text-anchor:middle;pointer-events:none}
+.node-type{fill:#93a7c6;font-size:10px;letter-spacing:.09em;text-anchor:middle;pointer-events:none;text-transform:uppercase}
+.is-dim{opacity:.2!important}
+.legend{margin-top:11px;display:flex;gap:12px;flex-wrap:wrap;position:relative;color:#91a4c4;font-size:12px}
+.legend span{display:flex;align-items:center;gap:6px}
+.inspector{display:flex;flex-direction:column;gap:14px}
+.inspector hr{width:100%;height:1px;border:0;background:#2e3b54;margin:7px 0}
+.inspector h2{overflow-wrap:anywhere}.inspector p{font-size:14px;margin:0}
+.detail-sub{font-size:12px;color:#80a9ef}
+.timeline{list-style:none;padding:0;margin:4px 0 0;border-left:1px solid #536384}
+.timeline li{position:relative;padding:0 0 12px 17px;margin:0;color:#a7b6d3;font-size:13px;line-height:1.5}
+.timeline li:before{content:"";position:absolute;left:-4px;top:6px;background:#819dff;width:7px;height:7px;border-radius:50%}
+.muted{font-size:12px;color:#869ab9!important}.error{color:#ffbbbb}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.panel{padding:15px}.graph{min-width:740px}main{padding-top:25px}.inspector{min-height:220px}}
+@media(max-width:450px){.chip{padding:8px}.toolbar{gap:5px}.brand{letter-spacing:.12em}header small{font-size:10px;padding:6px}h1{font-size:30px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important}}
+</style></head><body><header><div class="brand"><span class="brand-mark">✳</span><span>TURING</span></div><small>Beta 0.1 · dados fictícios · somente leitura</small></header><main id="app"><p>Carregando Metaverse...</p></main>
+<script>
+'use strict';
+const app=document.querySelector('#app');
+const base=new URL('./',location.href);
+const safe=(s)=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const state={universe:null,turing:null};
+const embedded={"index.json":{"schema_version":"0.1","name":"Metaverse","description":"Coleção de Universes; dados exclusivamente sintéticos neste beta","universes":["universes/universe-demo/universe.json"],"clusters":"clusters/index.json"},"universes/universe-demo/universe.json":{"id":"universe-demo","name":"Universe de demonstração","synthetic":true,"description":"Evento fictício para testar a visualização","turings":["turings/TURING-DEMO-0001/turing.json"]},"universes/universe-demo/turings/TURING-DEMO-0001/turing.json":{"id":"TURING-DEMO-0001","title":"Enigma sintético: símbolos e posições","synthetic":true,"status":"em-investigacao","summary":"Três símbolos aparecem em uma sequência. A ordem pode carregar informação.","nodes":[{"id":"p1","type":"pista","label":"Três símbolos","detail":"Observação fictícia: círculo, triângulo e quadrado."},{"id":"h1","type":"hipotese","label":"Ordem importa","detail":"Hipótese: a posição de cada símbolo representa um índice."},{"id":"t1","type":"teste","label":"Testar índices","detail":"Teste sintético: atribuir 1, 2 e 3 aos símbolos."},{"id":"r1","type":"resultado","label":"Inconclusivo","detail":"O teste não identificou uma resposta única."},{"id":"h2","type":"hipotese","label":"Outra leitura","detail":"Investigar se as formas indicam quantidade de lados."}],"edges":[{"from":"p1","to":"h1","label":"sugere"},{"from":"h1","to":"t1","label":"motiva"},{"from":"t1","to":"r1","label":"produz"},{"from":"p1","to":"h2","label":"alternativa"}],"history":[{"date":"2026-10-23","text":"Demonstração sintética criada; nenhuma investigação real foi importada."}]}};
+async function load(path){if(!Object.prototype.hasOwnProperty.call(embedded,path))throw Error('Conteúdo não encontrado: '+path);return structuredClone(embedded[path]);}
+function error(e){app.innerHTML='<p class="error">'+safe(e.message)+'</p><button id="retry">Tentar novamente</button>';document.querySelector('#retry').onclick=home;}
+function title(t,desc){return '<h1>'+safe(t)+'</h1><p>'+safe(desc)+'</p>';}
+async function home(){try{state.universe=null;state.turing=null;const idx=await load('index.json');const universes=await Promise.all(idx.universes.map(load));app.innerHTML=title('Metaverse','Escolha um Universe para explorar os enigmas registrados.')+'<div class="cards">'+universes.map((u,i)=>'<button class="card" data-u="'+i+'"><strong>'+safe(u.name)+'</strong><p>'+safe(u.description||'')+'</p></button>').join('')+'</div>';app.querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>universe(universes[+b.dataset.u]));}catch(e){error(e);}}
+async function universe(u){try{state.universe=u;const ts=await Promise.all(u.turings.map(p=>load('universes/'+u.id+'/'+p)));app.innerHTML='<button class="back" id="back">← Metaverse</button>'+title(u.name,'Selecione um Turing para visualizar o mapa da investigação.')+'<div class="cards">'+ts.map((t,i)=>'<button class="card" data-t="'+i+'"><strong>'+safe(t.id)+'</strong><p>'+safe(t.title)+'</p><small>'+safe(t.status)+'</small></button>').join('')+'</div>';document.querySelector('#back').onclick=home;app.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>turing(ts[+b.dataset.t]));}catch(e){error(e);}}
+
+function turing(t){
+ state.turing=t;
+ app.innerHTML='<button class="back" id="back">← '+safe(state.universe.name)+'</button>'
+  +title(t.id+' · '+t.title,t.summary)
+  +'<div class="layout"><section class="panel board"><div class="board-head"><div><div class="tag">CONSTELAÇÃO / MAPA DE INVESTIGAÇÃO</div><h2>Conexões do raciocínio</h2></div><span class="tag">'+(t.nodes||[]).length+' nós · '+(t.edges||[]).length+' conexões</span></div>'
+  +'<div class="toolbar" aria-label="Filtrar tipos de nós"><button class="chip" data-filter="todos" aria-pressed="true">Todos</button>'
+  +'<button class="chip" data-filter="pista" aria-pressed="false"><span class="chip-dot" style="background:#58b5ff"></span>Pistas</button>'
+  +'<button class="chip" data-filter="hipotese" aria-pressed="false"><span class="chip-dot" style="background:#b99aff"></span>Hipóteses</button>'
+  +'<button class="chip" data-filter="teste" aria-pressed="false"><span class="chip-dot" style="background:#f5c96a"></span>Testes</button>'
+  +'<button class="chip" data-filter="resultado" aria-pressed="false"><span class="chip-dot" style="background:#72d8ad"></span>Resultados</button></div>'
+  +'<div class="graph-scroll" id="graph-scroll" tabindex="0" aria-label="Constelação, deslize horizontalmente em telas pequenas"><svg class="graph" id="graph" viewBox="0 0 960 520" role="group" aria-label="Grafo de pistas, hipóteses, testes e resultados"></svg></div>'
+  +'<p class="muted">Selecione um ponto para ver seu conteúdo. No celular, deslize o mapa para os lados.</p></section>'
+  +'<aside class="panel inspector" aria-live="polite"><div class="tag">DETALHES DO NÓ</div><div class="detail-sub" id="node-type">Nenhum selecionado</div><h2 id="node-title">Explore a constelação</h2><p id="node-detail">Toque ou clique em um nó para entender a hipótese, teste ou evidência.</p><hr><div class="tag">HISTÓRICO</div><ol class="timeline">'+(t.history||[]).map(h=>'<li>'+safe(h.date)+' · '+safe(h.text)+'</li>').join('')+'</ol></aside></div>';
+ document.querySelector('#back').onclick=()=>universe(state.universe);
+ draw(t);
+ app.querySelectorAll('[data-filter]').forEach(button=>{
+   button.onclick=()=>{
+     app.querySelectorAll('[data-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
+     applyFilter(button.dataset.filter);
+   };
+ });
+}
+function applyFilter(type){
+ const graph=document.querySelector('#graph');
+ graph.querySelectorAll('.node').forEach(g=>{
+   g.classList.toggle('is-dim',type!=='todos'&&g.dataset.type!==type);
+ });
+ graph.querySelectorAll('.edge-group').forEach(g=>{
+   const source=graph.querySelector('[data-node-id="'+g.dataset.from+'"]');
+   const target=graph.querySelector('[data-node-id="'+g.dataset.to+'"]');
+   const show=type==='todos'||source?.dataset.type===type||target?.dataset.type===type;
+   g.classList.toggle('is-dim',!show);
+ });
+}
+function draw(t){
+ const svg=document.querySelector('#graph');
+ const ns='http://www.w3.org/2000/svg';
+ const colors={pista:'#58b5ff',hipotese:'#b99aff',teste:'#f5c96a',resultado:'#72d8ad'};
+ const nodes=t.nodes||[],edges=t.edges||[];
+ function el(tag,attrs,parent=svg){const n=document.createElementNS(ns,tag);for(const [key,value] of Object.entries(attrs))n.setAttribute(key,value);parent.append(n);return n;}
+ if(!nodes.length){const msg=el('text',{x:480,y:260,'text-anchor':'middle',fill:'#a9b6d2'});msg.textContent='Ainda não há conexões registradas.';return;}
+ const nodeMap=new Map(nodes.map(n=>[n.id,n]));
+ const layer=new Map(),inbound=new Map(nodes.map(n=>[n.id,0]));
+ edges.forEach(e=>{if(nodeMap.has(e.from)&&nodeMap.has(e.to))inbound.set(e.to,inbound.get(e.to)+1);});
+ const queue=nodes.filter(n=>inbound.get(n.id)===0).map(n=>n.id);
+ if(!queue.length)queue.push(nodes[0].id);
+ queue.forEach(id=>layer.set(id,0));
+ let iterations=0;
+ while(queue.length&&iterations++<nodes.length*nodes.length){
+   const id=queue.shift();
+   edges.filter(e=>e.from===id).forEach(e=>{
+     if(!nodeMap.has(e.to)||layer.has(e.to))return;
+     layer.set(e.to,Math.min(4,(layer.get(id)||0)+1));queue.push(e.to);
+   });
+ }
+ nodes.forEach(n=>{if(!layer.has(n.id))layer.set(n.id,0);});
+ const groups=new Map();
+ nodes.forEach(n=>{const l=layer.get(n.id);if(!groups.has(l))groups.set(l,[]);groups.get(l).push(n);});
+ const maxLayer=Math.max(...groups.keys(),1),pos=new Map();
+ groups.forEach((items,l)=>items.forEach((n,i)=>{
+   pos.set(n.id,{x:110+l*(740/maxLayer),y:95+(i+1)*(355/(items.length+1))});
+ }));
+ const defs=el('defs',{});
+ const arrow=el('marker',{id:'map-arrow',viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:5,markerHeight:5,orient:'auto-start-reverse'},defs);
+ el('path',{d:'M 0 0 L 10 5 L 0 10 z',fill:'#8399c5'},arrow);
+ edges.forEach((e)=>{
+   if(!pos.has(e.from)||!pos.has(e.to))return;
+   const a=pos.get(e.from),b=pos.get(e.to);
+   const group=el('g',{'class':'edge-group','data-from':e.from,'data-to':e.to});
+   const dx=Math.max(65,Math.abs(b.x-a.x)*.48);
+   const path=el('path',{d:'M '+(a.x+37)+' '+a.y+' C '+(a.x+dx)+' '+a.y+', '+(b.x-dx)+' '+b.y+', '+(b.x-40)+' '+b.y,class:'edge','marker-end':'url(#map-arrow)'},group);
+   const label=el('text',{x:(a.x+b.x)/2,y:(a.y+b.y)/2-10,'text-anchor':'middle',class:'edge-label'},group);label.textContent=e.label||'';
+ });
+ nodes.forEach(n=>{
+   const p=pos.get(n.id),c=colors[n.type]||'#a9b6d2';
+   const g=el('g',{class:'node','data-node-id':n.id,'data-type':n.type,tabindex:0,role:'button','aria-pressed':'false','aria-label':n.type+': '+n.label});
+   el('circle',{cx:p.x,cy:p.y,r:39,class:'node-ring',stroke:c},g);
+   el('circle',{cx:p.x,cy:p.y,r:10,fill:c,class:'node-core'},g);
+   const type=el('text',{x:p.x,y:p.y+57,class:'node-type'},g);
+   type.textContent={pista:'PISTA',hipotese:'HIPÓTESE',teste:'TESTE',resultado:'RESULTADO'}[n.type]||n.type;
+   const label=el('text',{x:p.x,y:p.y+76,class:'node-label'},g);
+   label.textContent=n.label.length>20?n.label.slice(0,19)+'…':n.label;
+   const select=()=>{
+     svg.querySelectorAll('.node').forEach(x=>x.setAttribute('aria-pressed','false'));
+     g.setAttribute('aria-pressed','true');
+     document.querySelector('#node-type').textContent=n.type.toUpperCase()+' · '+n.id;
+     document.querySelector('#node-title').textContent=n.label;
+     document.querySelector('#node-detail').textContent=n.detail||'Sem detalhes registrados.';
+     svg.querySelectorAll('.edge').forEach(edge=>edge.classList.remove('focus'));
+     svg.querySelectorAll('.edge-group').forEach(edge=>{
+       if(edge.dataset.from===n.id||edge.dataset.to===n.id)edge.querySelector('.edge')?.classList.add('focus');
+     });
+   };
+   g.addEventListener('click',select);
+   g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select();}});
+ });
+}
+home();
+</script></body></html>
